@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mustache</title>
+</head>
+<body>
+    <div>mustache</div>
+    <script src="/xuni/bundle.js"></script>
+    <script>
+        var templateStr = "<div>我买了{{thing}},价格是{{price}}。</div>"
+        var data = {
+            "thing" : "Computer",
+            "price": 5000
+        }
+        Mustache.render(templateStr, data)
+    </script>
+</body>
+</html>
