@@ -1,7 +1,7 @@
 import lookup from "./lookup";
 import parseArray from "./parseArray";
 export default function renderTemplate(tokens, data) {
-    console.log(tokens,data)
+    // console.log(tokens,data)
     var resultStr = '';
     for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
@@ -13,6 +13,6 @@ export default function renderTemplate(tokens, data) {
             resultStr += parseArray(token, data)
         }
     }
-    console.log(resultStr)
+    // console.log(resultStr)
     return resultStr;
 }

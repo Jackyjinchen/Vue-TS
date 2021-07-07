@@ -3,7 +3,7 @@ export default function nestTokens(tokens) {
     var sections = [];
     var collector = nestedTokens;
 
-    var token, section;
+    var token;
     for (let i = 0, numTokens = tokens.length; i < numTokens; ++i) {
         token = tokens[i];
 
@@ -15,7 +15,8 @@ export default function nestTokens(tokens) {
                 collector = token[2] = [];
                 break;
             case '/':
-                section = sections.pop();
+                // section = sections.pop();
+                sections.pop();
                 // section[5] = token[2];
                 collector = sections.length > 0 ? sections[sections.length - 1][2] : nestedTokens;
                 break;
@@ -24,6 +25,5 @@ export default function nestTokens(tokens) {
         }
 
     }
-
     return nestedTokens;
 }
