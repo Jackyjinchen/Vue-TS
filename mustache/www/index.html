@@ -1,21 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mustache</title>
+    <title>Mustache</title>
 </head>
+
 <body>
-    <div>mustache</div>
+    <div>Mustache</div>
+    <div id='template'></div>
     <script src="/xuni/bundle.js"></script>
     <script>
-        var templateStr = "<div>我买了{{thing}},价格是{{price}}。</div>"
+        var templateStr = `
+        <div>
+            <ol>
+                {{#person}}
+                {{name}}学院有很多课程,分别是
+                    <ol>
+                        {{#hobbies}}
+                        <li>{{.}}</li>
+                        {{/hobbies}}
+                    </ol>
+                {{/name}}
+            </ol>
+        </div>
+            `
         var data = {
-            "thing" : "Computer",
-            "price": 5000
+            person: [
+                { "name": "计算机", "hobbies": ['C语言', '数据结构与算法', '数据库原理'] },
+                { "name": "经管", "hobbies": ['经济学', '会计学'] },
+                { "name": "人文", "hobbies": ['中国历史', '中国文学'] }
+            ]
         }
-        Mustache.render(templateStr, data)
+        // var templateStr = `
+        // <div>
+        //     我是{{person}}
+        // </div>
+        //     `
+        // var data = {
+        //     person: "jack"
+        // }
+        let domStr = Mustache.render(templateStr, data);
+        document.getElementById('template').innerHTML = domStr
     </script>
 </body>
+
 </html>

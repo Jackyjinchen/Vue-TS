@@ -1,15 +1,9 @@
-import Scanner from './Scanner'
+import parseTemplateToTokens from './parseTemplateToTokens'
+import renderTemplate from './renderTemplate'
 window.Mustache = {
     render(templateStr, data) {
-        var scanner = new Scanner(templateStr)
-        while(!scanner.eos()) {
-            let word = scanner.scanUtil('{{')
-            console.log(word);
-            scanner.scan('{{');
-
-            word = scanner.scanUtil('}}')
-            console.log(word);
-            scanner.scan('}}');
-        }
+        var tokens = parseTemplateToTokens(templateStr);
+        var domStr = renderTemplate(tokens, data)
+        return domStr
     }
 }

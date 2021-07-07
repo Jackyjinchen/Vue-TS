@@ -1,7 +1,6 @@
 export default class Scanner {
     constructor(templateStr) {
         this.templateStr = templateStr;
-        console.log("Scanner", templateStr);
         this.pos = 0;
         this.tail = templateStr
     }
