@@ -109,3 +109,46 @@ var result = render(templateStr, data)
 
 <img src="README.assets/image-20210706155736416.png" alt="image-20210706155736416" style="zoom: 25%;" />
 
+## 虚拟DOM和diff算法
+
+1. 虚拟DOM被渲染函数（h函数）产生
+2. diff算法原理
+3. 虚拟DOM通过diff编程真正的DOM
+
+### snabbdom
+
+```js
+// 虚拟DOM的属性
+{
+  children: undefined // 子节点，undefined表示没有
+  data: { // 属性样式
+    props: {
+      href: "http://www.baidu.com"
+    }
+  }
+  elm: undefined // 该元素对应的真正的DOM节点，undefined表示还没有上树
+  key: undefined // 节点唯一标识
+  sel: "a" // selector选择器，节点类型
+  text: "百度一下" // 文字
+}
+```
+
+### diff
+
+**只有是同一个虚拟节点**（选择器相同且key相同才是同一个），才进行精细化比较，否则就是暴力删除旧的、插入新的。
+
+**只进行同层比较**，不会进行跨层比较。
+
+<img src="README.assets/image-20210708111345484.png" alt="image-20210708111345484" style="zoom:33%;" />
+
+**patch函数的比较过程**
+
+<img src="README.assets/image-20210708154902206.png" alt="image-20210708154902206" style="zoom:50%;" />
+
+**diff算法的比较顺序**
+
+1. 新前、旧前
+2. 新后、旧后
+3. 新后、旧前
+4. 新前、旧后
+5. 如果都未命中，循环查找

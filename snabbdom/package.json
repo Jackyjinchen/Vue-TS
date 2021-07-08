@@ -1,0 +1,17 @@
+{
+  "name": "snabbdom",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "snabbdom": "^3.0.3"
+  },
+  "devDependencies": {
+    "webpack": "5",
+    "webpack-cli": "3",
+    "webpack-dev-server": "3"
+  },
+  "scripts": {
+    "dev":"webpack-dev-server"
+  }
+}

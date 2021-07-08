@@ -7,7 +7,7 @@ export default function parseTemplateToTokens() {
     while (!scanner.eos()) {
         words = scanner.scanUtil('{{')
         if (words != '') {
-            tokens.push(['text', words]);
+            tokens.push(['text', words.replace(/\s{1,}(<)|(>)\s{1,}/g, '$1$2')]);
         }
 
         scanner.scan('{{');
