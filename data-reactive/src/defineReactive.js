@@ -1,3 +1,4 @@
+import Dep from "./Dep";
 import { observe } from "./observe";
 /**
 * defineReactive 定义一个闭包环境
@@ -6,6 +7,7 @@ import { observe } from "./observe";
 * @param {*} val 
 */
 export default function defineReactive(data, key, val) {
+    const dep = new Dep();
     if (arguments.length == 2) {
         val = data[key];
     }
@@ -19,6 +21,7 @@ export default function defineReactive(data, key, val) {
         configurable: true,
         get() {
             console.log(`访问${key}属性`, val);
+            dep.depend();
             return val;
         },
         set(newValue) {
@@ -29,6 +32,8 @@ export default function defineReactive(data, key, val) {
             val = newValue;
             // 当设置了新值，也需要被重新递归
             childOb = observe(newValue);
+            // 发布订阅模式，通知Dep
+            dep.notifiy();
         }
     });
 }

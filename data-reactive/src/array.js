@@ -43,6 +43,8 @@ methodsNeedChange.forEach(methodName => {
             ob.observeArray(inserted);
         }
 
+        ob.dep.notify();
+
         return result;
     }, false)
 })

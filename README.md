@@ -193,3 +193,24 @@ Object.setPrototypeOf(o, arrayMethods);
 o.__proto__ = arrayMethods;
 ```
 
+### 收集依赖
+
+需要用到数据的地方，称为依赖
+
+Vue1.x中，细粒度依赖，用到数据的DOM都是依赖
+
+Vue2.x中，中等粒度依赖，用到数据的组件是依赖
+
+在getter中收集依赖，在setter中触发依赖
+
+#### Dep类和Watcher类
+
+把依赖收集的代码封装成Dep类，每个Observer的实例，成员中都有一个Dep的实例。
+
+Watcher是一个中介，数据发生变化时通过Watcher中转，通知组件
+
+<img src="README.assets/image-20210709173944027.png" alt="image-20210709173944027" style="zoom: 33%;" />
+
+<img src="README.assets/image-20210709174010951.png" alt="image-20210709174010951" style="zoom:33%;" />
+
+ 
