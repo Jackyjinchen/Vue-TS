@@ -152,3 +152,44 @@ var result = render(templateStr, data)
 3. 新后、旧前
 4. 新前、旧后
 5. 如果都未命中，循环查找
+
+
+
+## 数据响应式原理
+
+<img src="README.assets/image-20210709121358184.png" alt="image-20210709121358184" style="zoom: 33%;" />
+
+```js
+// Vue 非侵入式
+this.a++;
+
+// React 侵入式
+this.setState({
+  a: this.state.a + 1
+})
+
+// 小程序 侵入式
+this.setData({
+  a: this.data.a + 1
+})
+```
+
+### Object.defineProperty()
+
+数据劫持/数据代理：利用JavaScript引擎赋予的功能，检测对象属性变化。
+
+具体详见**JavaScript笔记**内容
+
+<img src="README.assets/image-20210709142814652.png" alt="image-20210709142814652" style="zoom: 33%;" />
+
+### Vue改写的Array.prototype中7种方法
+
+原push、pop、shift、unshift、splice、sort、reverse七种方法定义在**Array.prototype**上。
+
+<img src="README.assets/image-20210709154606962.png" alt="image-20210709154606962" style="zoom:25%;" />
+
+```js
+Object.setPrototypeOf(o, arrayMethods);
+o.__proto__ = arrayMethods;
+```
+
