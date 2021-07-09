@@ -8,7 +8,7 @@ export default class Observer {
     constructor(value) {
         // 每一个Observer的实例都有一个Dep
         this.dep = new Dep();
-        console.log('Observer Constructor');
+        // console.log('Observer Constructor');
         // this表示实例
         def(value, '__ob__', this, false);
         // 检查是数组还是对象

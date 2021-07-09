@@ -28,6 +28,7 @@ methodsNeedChange.forEach(methodName => {
         const ob = this.__ob__;
         // 对于push、unshift、splice能够插入新项，也要变为observe的
         let inserted = [];
+        // 对于直接改写数组的内容例如a[i] = 10, 不属于数组常规方法，使用vue.$set
         switch (methodName) {
             case 'push':
             case 'unshift':

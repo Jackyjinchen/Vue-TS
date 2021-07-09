@@ -21,7 +21,13 @@ export default function defineReactive(data, key, val) {
         configurable: true,
         get() {
             console.log(`访问${key}属性`, val);
-            dep.depend();
+            // 依赖收集
+            if(Dep.target) {
+                dep.depend();
+                if(childOb) {
+                    childOb.dep.depend()
+                }
+            }
             return val;
         },
         set(newValue) {
@@ -33,7 +39,7 @@ export default function defineReactive(data, key, val) {
             // 当设置了新值，也需要被重新递归
             childOb = observe(newValue);
             // 发布订阅模式，通知Dep
-            dep.notifiy();
+            dep.notify();
         }
     });
 }

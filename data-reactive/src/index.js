@@ -1,4 +1,5 @@
 import { observe } from "./observe";
+import Watcher from './Watcher'
 var obj = {
     a: {
         m: {
@@ -14,5 +15,10 @@ var obj = {
 
 
 observe(obj);
-
 console.log(obj);
+
+new Watcher(obj, 'a.m.n', (newValue, oldValue) => {
+    console.log('通过Watcher监听到数据改变:' + oldValue + '修改为' + newValue)
+})
+
+obj.a.m.n = 10;

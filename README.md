@@ -213,4 +213,10 @@ Watcher是一个中介，数据发生变化时通过Watcher中转，通知组件
 
 <img src="README.assets/image-20210709174010951.png" alt="image-20210709174010951" style="zoom:33%;" />
 
- 
+<img src="README.assets/流程图.png" alt="流程图" style="zoom:80%;" />
+
+## AST抽象语法树
+
+AST：Abstract Syntax Tree 服务于模板编译
+
+模板 --> 抽象语法树AST --> 渲染函数（h函数） --> 虚拟节点 --> 界面
