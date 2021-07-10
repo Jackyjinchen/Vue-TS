@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directive</title>
+</head>
+
+<body>
+    <div>Directive 手撸一个Vue</div>
+    <div id="app">
+        a的值：{{a}}
+        <h3>Hello Vue</h3>
+        <input v-model="a"></input>
+        <ul>
+            <li>A</li>
+            <li>B</li>
+            <li>C</li>
+        </ul>
+    </div>
+    <button onclick="add()">点我加一</button>
+    <script src='/xuni/bundle.js'></script>
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                a: 10
+            },
+            watch: {
+                a() {
+                    console.log('a changing!');
+                }
+            },
+            created() {
+
+            },
+            updated() {
+                
+            }
+        });
+        console.log(vm);
+        vm.a = 20;
+
+        function add() {
+            vm.a++;
+        }
+    </script>
+</body>
+
+</html>

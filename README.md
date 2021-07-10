@@ -220,3 +220,8 @@ Watcher是一个中介，数据发生变化时通过Watcher中转，通知组件
 AST：Abstract Syntax Tree 服务于模板编译
 
 模板 --> 抽象语法树AST --> 渲染函数（h函数） --> 虚拟节点 --> 界面
+
+## Vue的生命周期
+
+<img src="README.assets/lifecycle.png" alt="img" style="zoom:80%;" />
+

@@ -1,14 +1,12 @@
 import parse from "./parse"
 
-var template = `
-    <div>
-        <h3>hello</h3>
+var template = `<div>
+        <h3 class="title">hello</h3>
         <ul>
             <li>A</li>
             <li>B</li>
             <li>C</li>
         </ul>
-    </div>
-`
+    </div>`
 let ast = parse(template);
 console.log(ast);
