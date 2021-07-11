@@ -1146,9 +1146,6 @@ vue create my-project
 
 ```bash
 yarn create @vitejs/app
-cd <project-name>
-npm install
-npm run dev
 ```
 
 https://24kcs.github.io/vue3_study/chapter3/01_%E8%AE%A4%E8%AF%86Vue3.html#_2-%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87
