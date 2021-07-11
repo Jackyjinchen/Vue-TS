@@ -1,3 +1,267 @@
+# Vue基础
+
+## Vue基础概念
+
+### 概念
+
+遵循MVVM模式。
+
+1. 借鉴Angular的模板和数据绑定技术
+2. 借鉴React的组件化和虚拟DOM技术
+
+### Vue Plugin及第三方库
+
+vue-cli
+
+vue-resource(axios) ajax请求
+
+vue-router 路由
+
+vuex 状态管理
+
+vue-lazyload 懒加载
+
+vue-scroller 页面滑动相关
+
+mint-ui
+
+element-ui
+
+......
+
+## Vue使用
+
+
+
+### 指令
+
+```html
+// v-text v-html(理解成html)
+<div v-text='data'></div>
+
+// 强制绑定
+<img v-bind:src='imgUrl'>
+<img :src='imgUrl'>
+<div :class='aClass'></div>
+<div :style="{ font-size:'20px' }"></div>
+
+// 绑定监听事件
+<button v-on:click='clickFun'></button>
+<button @click='clickFun'></button>
+
+// 双向绑定
+<input v-model='data'>
+
+// 条件绑定 需要频繁切换使用v-show
+<div v-if="prop"></div>
+<div v-else></div>
+<div v-show="ok"></div>
+
+// 遍历数组
+<ul>
+    <li v-for="(p, i) in data" :key="i">
+        {{p.name}}
+    </li>
+</ul>
+
+// ref 指定唯一标识符，vue通过$els属性访问这个元素对象
+<div ref="ref1"></div>
+
+// v-cloak 防止闪现，与css配合 [v-cloak] { display:none}
+<div v-cloak></div>
+```
+
+### 自定义指令
+
+```js
+// 注册全局指令
+// binding 包含指令相关信息的数据变量
+Vue.directive('my-directive', function(el, binding) {
+    el.innerHTML = binding.value.toupperCase()
+})
+
+// 注册局部指令
+directives: {
+    'my-directive': {
+        bind(el, binding) {
+            el.innerHTML = binding.value.toupperCase()
+        }
+    }
+}
+// 使用指令
+// v-my-derective='xxx'
+```
+
+
+
+### 属性
+
+```js
+const vm = new Vue({
+    el:'#app',
+    data: {
+        temp:'Hello Vue'
+    },
+    methods:{
+        
+    },
+    computed:{
+		// 计算属性 存在缓存
+        a() {
+        	return 5
+        }
+	},
+	watch:{
+		// 监视属性
+		b: function(value) {
+			this.a = value + this.b
+		}
+	}
+    // ...
+})
+
+vm.$watch('c', function(value) {
+    console.log(value)
+})
+```
+
+### 事件处理
+
+#### 事件对象$event
+
+```html
+<button @click="a(123,$event)"></button>
+```
+
+```js
+new Vue({
+    el:'#app',
+    methods:{
+        // 事件中不传值自动event，若传值则需要传递
+        a(event) {
+            console.log(event)
+        }
+    }
+})
+```
+
+#### 事件冒泡
+
+```html
+<div @click="a">
+    // 点击此标签也会调用a方法
+    // .stop和event.stopPropagation()相同 停止事件冒泡
+    <div @click.stop="b"></div>
+    // 相当于event.preventDefault() 阻止默认行为
+    <div @click.prevent="b"></div>
+</div>
+```
+
+#### 按键修饰符
+
+```html
+// event.target.value event.keyCode
+// 绑定了enter按键时的方法
+<input type="text" @keyup.enter="c">
+<input type="text" @keyup.13="c">
+```
+
+### 生命周期
+
+<img src="README.assets/lifecycle.png" alt="img" style="zoom:80%;" />
+
+### Vue动画
+
+<img src="README.assets/transition.png" alt="Transition Diagram" style="zoom: 50%;" />
+
+**过渡的相关类名**
+
+xxx-enter-active 指定显示的transition
+
+xxx-leave-active 指定隐藏的transition
+
+xxx-enter/xxx-leave-to 指定隐藏时的样式
+
+```vue
+<template>
+	<transition name="xxx">
+    	<p>textContent</p>
+    </transition>
+</template>
+
+<style>
+    .xxx-enter-active {
+        transition: opacity 1s;
+    }
+    .xxx-enter {
+        opacity: 0;
+    }
+</style>
+```
+
+### 过滤器
+
+```js
+Vue.filter('dataString', function(value) {
+    let val;
+    // 处理
+    return val
+})
+```
+
+### 插件 
+
+```js
+const MyPlugin = {
+    install(Vue, options) {
+      // 1. 添加全局方法或 property
+      Vue.myGlobalMethod = function () {
+        // 逻辑...
+      }
+
+      // 2. 添加全局资源
+      Vue.directive('my-directive', {
+        bind (el, binding, vnode, oldVnode) {
+          // 逻辑...
+        }
+        ...
+      })
+
+      // 3. 注入组件选项
+      Vue.mixin({
+        created: function () {
+          // 逻辑...
+        }
+        ...
+      })
+
+      // 4. 添加实例方法
+      Vue.prototype.$myMethod = function (methodOptions) {
+        // 逻辑...
+      }
+	}
+};
+
+// 将插件暴露出去
+export default MyPlugin;
+```
+
+```js
+// 在你调用 new Vue() 启动应用之前完成：
+// 调用 `MyPlugin.install(Vue)`
+Vue.use(MyPlugin)
+
+new Vue({
+  // ...组件选项
+})
+```
+
+### 其他
+
+do it yourself 看文档去
+
+
+
 # Vue源码
 
 ## mustache
@@ -221,7 +485,36 @@ AST：Abstract Syntax Tree 服务于模板编译
 
 模板 --> 抽象语法树AST --> 渲染函数（h函数） --> 虚拟节点 --> 界面
 
-## Vue的生命周期
 
-<img src="README.assets/lifecycle.png" alt="img" style="zoom:80%;" />
+
+# Vue3 + TS
+
+## TypeScript
+
+<img src="README.assets/28ca61cc160c417c8497a00defdca5f0~tplv-k3u1fbpfcp-watermark.image" alt="TS与JS.png" style="zoom: 67%;" />
+
+**TypeScript 是 JavaScript 的一个超集**，主要提供了**类型系统**和**对 ES6+ 的支持**
+
+TypeScript 主要有 3 大特点：
+
+- **始于JavaScript，归于JavaScript**
+
+TypeScript 可以编译出纯净、 简洁的 JavaScript 代码，并且可以运行在任何浏览器上、Node.js 环境中和任何支持 ECMAScript 3（或更高版本）的JavaScript 引擎中。
+
+- **强大的类型系统**
+
+**类型系统**允许 JavaScript 开发者在开发 JavaScript 应用程序时使用高效的开发工具和常用操作比如静态检查和代码重构。
+
+- **先进的 JavaScript**
+
+TypeScript 提供最新的和不断发展的 JavaScript 特性，包括那些来自 2015 年的 ECMAScript 和未来的提案中的特性，比如异步功能和 Decorators，以帮助建立健壮的组件。
+
+### HelloWorld
+
+```shell
+npm install -g typescript
+tsc —V # 安装成功
+```
+
+<img src="README.assets/typescript_compiler.png" alt="img"  />
 
