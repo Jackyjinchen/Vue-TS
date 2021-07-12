@@ -1986,39 +1986,37 @@ toRef:
   <p>{{keyword}}</p>
 </template>
 <script lang="ts">
-  import { ref, customRef } from 'vue'
-  export default {
-    setup () {
-      const keyword = useDebouncedRef('', 500)
-      console.log(keyword)
-      return {
-        keyword
-      }
-    },
-  }
-  /* 
-实现函数防抖的自定义ref
-*/
-  function useDebouncedRef<T>(value: T, delay = 200) {
-    let timeout: number
-    return customRef((track, trigger) => {
-      return {
-        get() {
-          // 告诉Vue追踪数据
-          track()
-          return value
+    import { ref, customRef } from 'vue'
+    export default {
+        setup () {
+            const keyword = useDebouncedRef('', 500)
+            console.log(keyword)
+            return {
+                keyword
+            }
         },
-        set(newValue: T) {
-          clearTimeout(timeout)
-          timeout = setTimeout(() => {
-            value = newValue
-            // 告诉Vue去触发界面更新
-            trigger()
-          }, delay)
-        }
-      }
-    })
-  }
+    }
+    //实现函数防抖的自定义ref
+    function useDebouncedRef<T>(value: T, delay = 200) {
+        let timeout: number
+        return customRef((track, trigger) => {
+            return {
+                get() {
+                    // 告诉Vue追踪数据
+                    track()
+                    return value
+                },
+                set(newValue: T) {
+                    clearTimeout(timeout)
+                    timeout = setTimeout(() => {
+                        value = newValue
+                        // 告诉Vue去触发界面更新
+                        trigger()
+                    }, delay)
+                }
+            }
+        })
+    }
 </script>
 ```
 
@@ -2104,3 +2102,470 @@ export default {
 - isReactive: 检查一个对象是否是由 `reactive` 创建的响应式代理
 - isReadonly: 检查一个对象是否是由 `readonly` 创建的只读代理
 - isProxy: 检查一个对象是否是由 `reactive` 或者 `readonly` 方法创建的代理
+
+### 手写组合API
+
+#### shallowReactive与reactive
+
+```typescript
+const reactiveHandler = {
+    get (target, key) {
+        if (key==='_is_reactive') return true
+        return Reflect.get(target, key)
+    },
+    set (target, key, value) {
+        const result = Reflect.set(target, key, value)
+        console.log('数据已更新, 去更新界面')
+        return result
+    },
+    deleteProperty (target, key) {
+        const result = Reflect.deleteProperty(target, key)
+        console.log('数据已删除, 去更新界面')
+        return result
+    },
+}
+/* 
+自定义shallowReactive
+*/
+function shallowReactive(obj) {
+    if (target && typeof target==='object') {
+        return new Proxy(obj, reactiveHandler)
+    }
+    return target
+}
+/* 
+自定义reactive
+*/
+function reactive (target) {
+    if (target && typeof target==='object') {
+        if (target instanceof Array) { // 数组
+            target.forEach((item, index) => {
+                target[index] = reactive(item)
+            })
+        } else { // 对象
+            Object.keys(target).forEach(key => {
+                target[key] = reactive(target[key])
+            })
+        }
+        const proxy = new Proxy(target, reactiveHandler)
+        return proxy
+    }
+    return target
+}
+/* 测试自定义shallowReactive */
+const proxy = shallowReactive({
+    a: {
+        b: 3
+    }
+})
+proxy.a = {b: 4} // 劫持到了
+proxy.a.b = 5 // 没有劫持到
+/* 测试自定义reactive */
+const obj = {
+    a: 'abc',
+    b: [{x: 1}],
+    c: {x: [11]},
+}
+const proxy = reactive(obj)
+console.log(proxy)
+proxy.b[0].x += 1
+proxy.c.x[0] += 1
+```
+
+#### shallowReadonly与readonly
+
+```js
+const readonlyHandler = {
+    get (target, key) {
+        if (key==='_is_readonly') return true
+        return Reflect.get(target, key)
+    },
+    set () {
+        console.warn('只读的, 不能修改')
+        return true
+    },
+    deleteProperty () {
+        console.warn('只读的, 不能删除')
+        return true
+    },
+}
+/* 
+自定义shallowReadonly
+*/
+function shallowReadonly(obj) {
+    return new Proxy(obj, readonlyHandler)
+}
+/* 
+自定义readonly
+*/
+function readonly(target) {
+    if (target && typeof target==='object') {
+        if (target instanceof Array) { // 数组
+            target.forEach((item, index) => {
+                target[index] = readonly(item)
+            })
+        } else { // 对象
+            Object.keys(target).forEach(key => {
+                target[key] = readonly(target[key])
+            })
+        }
+        const proxy = new Proxy(target, readonlyHandler)
+
+        return proxy 
+    }
+    return target
+}
+/* 测试自定义readonly */
+/* 测试自定义shallowReadonly */
+const objReadOnly = readonly({
+    a: {
+        b: 1
+    }
+})
+const objReadOnly2 = shallowReadonly({
+    a: {
+        b: 1
+    }
+})
+objReadOnly.a = 1
+objReadOnly.a.b = 2
+objReadOnly2.a = 1
+objReadOnly2.a.b = 2
+```
+
+#### shallowRef与ref
+
+```js
+/*
+自定义shallowRef
+*/
+function shallowRef(target) {
+  const result = {
+    _value: target, // 用来保存数据的内部属性
+    _is_ref: true, // 用来标识是ref对象
+    get value () {
+      return this._value
+    },
+    set value (val) {
+      this._value = val
+      console.log('set value 数据已更新, 去更新界面')
+    }
+  }
+
+  return result
+}
+
+/* 
+自定义ref
+*/
+function ref(target) {
+  if (target && typeof target==='object') {
+    target = reactive(target)
+  }
+
+  const result = {
+    _value: target, // 用来保存数据的内部属性
+    _is_ref: true, // 用来标识是ref对象
+    get value () {
+      return this._value
+    },
+    set value (val) {
+      this._value = val
+      console.log('set value 数据已更新, 去更新界面')
+    }
+  }
+
+  return result
+}
+
+/* 测试自定义shallowRef */
+const ref3 = shallowRef({
+  a: 'abc',
+})
+ref3.value = 'xxx'
+ref3.value.a = 'yyy'
+
+
+/* 测试自定义ref */
+const ref1 = ref(0)
+const ref2 = ref({
+  a: 'abc',
+  b: [{x: 1}],
+  c: {x: [11]},
+})
+ref1.value++
+ref2.value.b[0].x++
+console.log(ref1, ref2)
+```
+
+#### isRef, isReactive与isReadonly
+
+```js
+/* 
+判断是否是ref对象
+*/
+function isRef(obj) {
+    return obj && obj._is_ref
+}
+/* 
+判断是否是reactive对象
+*/
+function isReactive(obj) {
+    return obj && obj._is_reactive
+}
+/* 
+判断是否是readonly对象
+*/
+function isReadonly(obj) {
+    return obj && obj._is_readonly
+}
+/* 
+是否是reactive或readonly产生的代理对象
+*/
+function isProxy (obj) {
+    return isReactive(obj) || isReadonly(obj)
+}
+/* 测试判断函数 */
+console.log(isReactive(reactive({})))
+console.log(isRef(ref({})))
+console.log(isReadonly(readonly({})))
+console.log(isProxy(reactive({})))
+console.log(isProxy(readonly({})))
+```
+
+### Composition API 对比 Option API
+
+#### Option API
+
+- 在传统的Vue OptionsAPI中，新增或者修改一个需求，就需要分别在data，methods，computed里修改 ，滚动条反复上下移动
+
+<img src="README.assets/f84e4e2c02424d9a99862ade0a2e4114~tplv-k3u1fbpfcp-watermark.image" alt="img" style="zoom: 50%;" />
+
+<img src="README.assets/e5ac7e20d1784887a826f6360768a368~tplv-k3u1fbpfcp-watermark.image" alt="img" style="zoom:50%;" />
+
+#### Composition API
+
+<img src="README.assets/bc0be8211fc54b6c941c036791ba4efe~tplv-k3u1fbpfcp-watermark.image" alt="img" style="zoom:50%;" />
+
+<img src="README.assets/6cc55165c0e34069a75fe36f8712eb80~tplv-k3u1fbpfcp-watermark.image" alt="img" style="zoom:50%;" />
+
+<img src="README.assets/2c421e5392504ecc94c222057dba338a~tplv-k3u1fbpfcp-watermark.image" alt="img" style="zoom: 50%;" />
+
+### 其他新组合和API
+
+#### 新组件
+
+##### Fragment (片断)
+
+- 在Vue2中: 组件必须有一个根标签
+- 在Vue3中: 组件可以没有根标签, 内部会将多个标签包含在一个Fragment虚拟元素中
+- 好处: 减少标签层级, 减小内存占用
+
+```vue
+<template>
+    <h2>aaaa</h2>
+    <h2>aaaa</h2>
+</template>
+```
+
+##### Teleport (瞬移)
+
+- Teleport 提供了一种干净的方法, 让组件的html在父组件界面外的特定标签(很可能是body)下插入显示
+
+ModalButton.vue
+
+```vue
+<template>
+  <button @click="modalOpen = true">
+      Open full screen modal! (With teleport!)
+  </button>
+<!--放置在body标签中-->
+  <teleport to="body">
+    <div v-if="modalOpen" class="modal">
+      <div>
+        I'm a teleported modal! 
+        (My parent is "body")
+        <button @click="modalOpen = false">
+          Close
+        </button>
+      </div>
+    </div>
+  </teleport>
+</template>
+
+<script>
+import { ref } from 'vue'
+export default {
+  name: 'modal-button',
+  setup () {
+    const modalOpen = ref(false)
+    return {
+      modalOpen
+    }
+  }
+}
+</script>
+
+
+<style>
+.modal {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background-color: rgba(0,0,0,.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  width: 300px;
+  height: 300px;
+  padding: 5px;
+}
+</style>
+```
+
+App.vue
+
+```vue
+<template>
+  <h2>App</h2>
+  <modal-button></modal-button>
+</template>
+
+<script lang="ts">
+import ModalButton from './ModalButton.vue'
+
+export default {
+  setup() {
+    return {
+    }
+  },
+
+  components: {
+    ModalButton
+  }
+}
+</script>
+```
+
+##### Suspense (不确定的)
+
+- 它们允许我们的应用程序在等待异步组件时渲染一些后备内容，可以让我们创建一个平滑的用户体验
+
+```vue
+<template>
+  <Suspense>
+    <template v-slot:default>
+      <AsyncComp/>
+      <!-- <AsyncAddress/> -->
+    </template>
+
+    <template v-slot:fallback>
+      <h1>LOADING...</h1>
+    </template>
+  </Suspense>
+</template>
+
+<script lang="ts">
+/* 
+异步组件 + Suspense组件
+*/
+// import AsyncComp from './AsyncComp.vue'
+import AsyncAddress from './AsyncAddress.vue'
+import { defineAsyncComponent } from 'vue'
+const AsyncComp = defineAsyncComponent(() => import('./AsyncComp.vue'))
+export default {
+  setup() {
+    return {
+     
+    }
+  },
+
+  components: {
+    AsyncComp,
+    AsyncAddress
+  }
+}
+</script>
+```
+
+- AsyncComp.vue
+
+```vue
+<template>
+  <h2>AsyncComp22</h2>
+  <p>{{msg}}</p>
+</template>
+
+<script lang="ts">
+
+export default {
+  name: 'AsyncComp',
+  setup () {
+    // return new Promise((resolve, reject) => {
+    //   setTimeout(() => {
+    //     resolve({
+    //       msg: 'abc'
+    //     })
+    //   }, 2000)
+    // })
+    return {
+      msg: 'abc'
+    }
+  }
+}
+</script>
+```
+
+- AsyncAddress.vue
+
+```vue
+<template>
+<h2>{{data}}</h2>
+</template>
+
+<script lang="ts">
+import axios from 'axios'
+export default {
+  async setup() {
+    const result = await axios.get('/data/address.json')
+    return {
+      data: result.data
+    }
+  }
+}
+</script>
+```
+
+#### 其他新的API
+
+##### 全新的全局API
+
+- createApp()
+- defineProperty()
+- defineAsyncComponent()
+- nextTick()
+
+##### 将原来的全局API转移到应用对象
+
+- app.component()
+- app.config()
+- app.directive()
+- app.mount()
+- app.unmount()
+- app.use()
+
+##### 模板语法变化
+
+- v-model的本质变化
+  - prop：value -> modelValue；
+  - event：input -> update:modelValue；
+- .sync修改符已移除, 由v-model代替
+- v-if优先v-for解析
